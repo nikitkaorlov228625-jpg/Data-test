@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Наше свидание ❤️</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;font-family:Arial,sans-serif}
+body{
+  overflow:hidden;
+  background:linear-gradient(135deg,#ffd6e7 0%,#fff5f8 48%,#ffdce9 100%);
+  color:#333;
+}
+.bg-heart{position:fixed;opacity:.12;font-size:35px;animation:float 7s linear infinite;pointer-events:none}
+.h1{font-size:clamp(28px,8vw,42px);margin:0 0 14px;color:#ff4f81}
+.sub{font-size:17px;line-height:1.5;color:#666;margin:0 auto 28px;max-width:360px}
+.screen{
+  width:100%;height:100%;display:none;align-items:center;justify-content:center;
+  padding:22px;
+}
+.screen.active{display:flex}
+.card{
+  width:min(100%,520px);background:rgba(255,255,255,.94);border-radius:30px;
+  padding:30px 22px;box-shadow:0 18px 60px rgba(150,50,90,.16);
+  text-align:center;position:relative;
+}
+.emoji{font-size:60px;margin-bottom:10px}
+.btn{
+  border:0;border-radius:999px;padding:15px 27px;font-size:18px;font-weight:700;
+  cursor:pointer;transition:.18s;touch-action:manipulation
+}
+.btn:active{transform:scale(.96)}
+.primary{background:#ff4f81;color:white;box-shadow:0 8px 20px rgba(255,79,129,.25)}
+.primary:hover{transform:scale(1.04)}
+.answers{display:grid;gap:12px;margin-top:24px}
+.answer{
+  width:100%;padding:15px 17px;border:2px solid #ffd0df;background:#fff;
+  border-radius:18px;font-size:16px;text-align:left;cursor:pointer;transition:.18s;
+}
+.answer:hover{background:#fff0f5;border-color:#ff8faf}
+.progress-wrap{height:7px;background:#f4dce5;border-radius:20px;margin-bottom:22px;overflow:hidden}
+.progress{height:100%;width:0;background:#ff4f81;border-radius:20px;transition:.3s}
+.q-number{font-size:14px;color:#a27b89;margin-bottom:9px}
+.question{font-size:25px;line-height:1.25;margin:0}
+.note{font-size:13px;color:#999;margin-top:18px}
+#no{
+  background:#eee;color:#555;position:relative;
+}
+#no.flee{position:fixed;z-index:20}
+.result-heart{font-size:78px;animation:pulse 1s infinite}
+.result-text{font-size:18px;line-height:1.6;color:#666}
+.small{font-size:13px;color:#aaa;margin-top:20px}
+@keyframes pulse{50%{transform:scale(1.13)}}
+@keyframes float{from{transform:translateY(110vh) rotate(0deg)}to{transform:translateY(-15vh) rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="bg-heart" style="left:8%;animation-delay:0s">♥</div>
+<div class="bg-heart" style="left:25%;animation-delay:2s">♥</div>
+<div class="bg-heart" style="left:70%;animation-delay:1s">♥</div>
+<div class="bg-heart" style="left:88%;animation-delay:4s">♥</div>
+
+<section class="screen active" id="start">
+  <div class="card">
+    <div class="emoji">💌</div>
+    <h1 class="h1">У меня к тебе вопрос...</h1>
+    <p class="sub">Но сначала обещай отвечать честно.<br>Ну или хотя бы делать вид 😏</p>
+    <button class="btn primary" onclick="showFirst()">Начать ❤️</button>
+  </div>
+</section>
+
+<section class="screen" id="first">
+  <div class="card">
+    <div class="emoji">🥰</div>
+    <h1 class="h1">Ты пойдёшь со мной на свидание?</h1>
+    <div style="display:flex;justify-content:center;gap:14px;min-height:58px;align-items:center">
+      <button class="btn primary" id="yes">Да!</button>
+      <button class="btn" id="no">Нет!(((</button>
+    </div>
+    <p class="note">Других вариантов ответа, к сожалению, не предусмотрено.</p>
+  </div>
+</section>
+
+<section class="screen" id="dateChoice">
+  <div class="card">
+    <div class="emoji">🥺💗</div>
+    <h1 class="h1" style="font-size:clamp(25px,7vw,36px)">Ух ты, ты правда хочешь сходить со мной на свидание?🥺🥺🥺</h1>
+    <p class="sub">Тогда выбери подходящую дату 📅</p>
+
+    <button class="btn primary" id="openCalendar">Выбрать дату</button>
+
+    <div id="calendarBox" style="display:none;margin-top:22px;text-align:left">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <button class="btn" id="prevMonth" style="padding:8px 13px;font-size:16px">‹</button>
+        <strong id="monthTitle" style="font-size:18px"></strong>
+        <button class="btn" id="nextMonth" style="padding:8px 13px;font-size:16px">›</button>
+      </div>
+
+      <div id="calendar" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px"></div>
+
+      <p id="selectedDate" style="text-align:center;color:#ff4f81;font-weight:700;min-height:22px;margin:16px 0 10px"></p>
+      <button class="btn primary" id="dateContinue" style="width:100%;display:none">Продолжить ❤️</button>
+    </div>
+
+    <p class="note">Выбери день, который тебе подходит. Потом обсудим время 😉</p>
+  </div>
+</section>
+
+<section class="screen" id="quiz">
+  <div class="card">
+    <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+    <div class="q-number" id="qNumber"></div>
+    <h2 class="question" id="question"></h2>
+    <div class="answers" id="answers"></div>
+    <p class="note">Выбирай вариант, который ближе всего к тебе ❤️</p>
+  </div>
+</section>
+
+<section class="screen" id="result">
+  <div class="card">
+    <div class="result-heart">❤️</div>
+    <h1 class="h1">Тест пройден!</h1>
+    <p class="result-text" id="resultText"></p>
+    <button class="btn primary" onclick="restart()">Пройти ещё раз</button>
+    <div class="small">А теперь осталось самое интересное — само свидание 😉</div>
+  </div>
+</section>
+
+<script>
+/*
+  Telegram integration:
+  Paste your deployed Google Apps Script Web App URL below.
+  Do NOT put the Telegram bot token in this HTML file.
+*/
+const TELEGRAM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyl6-M7UBxLSajm3hS3DJ1ftoJluDWXB8Odicy5a1o0JgYJMS_S9BlKGJKRWPAtFiJ2vw/exec';
+
+/*
+  ЗДЕСЬ МОЖНО ЛЕГКО МЕНЯТЬ ВОПРОСЫ.
+  Каждый вопрос: текст + 3/4 варианта ответа.
+*/
+const questions = [
+  {
+    q: "Какое свидание тебе было бы интереснее всего?",
+    a: ["Прогулка и разговоры", "Уютное место с вкусной едой", "Что-нибудь активное", "Спонтанное приключение"]
+  },
+  {
+    q: "Что для тебя самое важное на первом свидании?",
+    a: ["Чтобы было весело", "Чтобы можно было поговорить", "Чтобы было романтично", "Чтобы всё прошло необычно"]
+  },
+  {
+    q: "Если бы мы могли прямо сейчас оказаться где угодно, куда бы ты выбрала?",
+    a: ["У моря 🌊", "В красивом городе 🌆", "Где-нибудь на природе 🌲", "Там, где нас никто не будет торопить"]
+  },
+  {
+    q: "Кто должен первым предложить следующую встречу?",
+    a: ["Ты", "Я", "Кто первый захочет", "Думаю, это решится само собой"]
+  },
+  {
+    q: "Какой момент на свидании запомнился бы тебе больше всего?",
+    a: ["Долгий разговор", "Смешной случай", "Неожиданный сюрприз", "Красивый момент вдвоём"]
+  },
+  {
+    q: "Что лучше всего подходит для идеального вечера?",
+    a: ["Музыка и прогулка", "Фильм и уют", "Приключение до позднего вечера", "Просто быть рядом и никуда не спешить"]
+  },
+  {
+    q: "Если свидание пройдёт хорошо, что должно произойти после?",
+    a: ["Вторая встреча", "Долгий разговор", "Сообщение «мне понравилось»", "Думаю, продолжение будет очевидным 😉"]
+  },
+  {
+    q: "И последний вопрос: повторим такое ещё раз?",
+    a: ["Конечно ❤️", "Да, и желательно скоро", "Думаю, ты уже знаешь ответ", "После такого теста выбора нет 😏"]
+  }
+];
+
+let current = 0;
+let answers = [];
+
+function activate(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showFirst(){ activate('first'); }
+
+const no = document.getElementById('no');
+const yes = document.getElementById('yes');
+
+function moveNo(){
+  no.classList.add('flee');
+  const pad = 12;
+  const maxX = Math.max(pad, window.innerWidth - no.offsetWidth - pad);
+  const maxY = Math.max(pad, window.innerHeight - no.offsetHeight - pad);
+  no.style.left = (pad + Math.random() * (maxX-pad)) + 'px';
+  no.style.top = (pad + Math.random() * (maxY-pad)) + 'px';
+}
+no.addEventListener('mouseenter', moveNo);
+no.addEventListener('touchstart', e=>{e.preventDefault();moveNo()},{passive:false});
+no.addEventListener('click', e=>{e.preventDefault();moveNo()});
+
+yes.addEventListener('click', ()=>{
+  no.classList.remove('flee');
+  current=0; answers=[];
+  activate('dateChoice');
+  openCalendar();
+});
+
+
+const monthNames = [
+  'Январь','Февраль','Март','Апрель','Май','Июнь',
+  'Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'
+];
+const weekNames = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+let calendarDate = new Date();
+calendarDate.setHours(0,0,0,0);
+let chosenDate = null;
+
+const openCalendarButton = document.getElementById('openCalendar');
+const calendarBox = document.getElementById('calendarBox');
+const calendar = document.getElementById('calendar');
+const monthTitle = document.getElementById('monthTitle');
+const selectedDate = document.getElementById('selectedDate');
+const dateContinue = document.getElementById('dateContinue');
+
+function openCalendar(){
+  calendarBox.style.display='block';
+  renderCalendar();
+}
+
+openCalendarButton.addEventListener('click', openCalendar);
+
+document.getElementById('prevMonth').addEventListener('click', ()=>{
+  calendarDate.setMonth(calendarDate.getMonth()-1);
+  renderCalendar();
+});
+
+document.getElementById('nextMonth').addEventListener('click', ()=>{
+  calendarDate.setMonth(calendarDate.getMonth()+1);
+  renderCalendar();
+});
+
+function renderCalendar(){
+  calendar.innerHTML='';
+
+  monthTitle.textContent =
+    monthNames[calendarDate.getMonth()] + ' ' + calendarDate.getFullYear();
+
+  weekNames.forEach(day=>{
+    const el=document.createElement('div');
+    el.textContent=day;
+    el.style.textAlign='center';
+    el.style.fontSize='12px';
+    el.style.color='#a27b89';
+    el.style.fontWeight='700';
+    el.style.padding='4px 0';
+    calendar.appendChild(el);
+  });
+
+  const year=calendarDate.getFullYear();
+  const month=calendarDate.getMonth();
+
+  // JS: Sunday=0, преобразуем в Пн=0...Вс=6
+  let firstDay=new Date(year,month,1).getDay();
+  firstDay=(firstDay+6)%7;
+
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const today=new Date();
+  today.setHours(0,0,0,0);
+
+  for(let i=0;i<firstDay;i++){
+    const empty=document.createElement('div');
+    calendar.appendChild(empty);
+  }
+
+  for(let day=1;day<=daysInMonth;day++){
+    const d=new Date(year,month,day);
+    d.setHours(0,0,0,0);
+
+    const button=document.createElement('button');
+    button.textContent=day;
+    button.type='button';
+    button.style.border='0';
+    button.style.borderRadius='12px';
+    button.style.padding='11px 3px';
+    button.style.fontSize='15px';
+    button.style.background='#fff0f5';
+    button.style.color='#555';
+    button.style.cursor='pointer';
+
+    // Нельзя выбрать прошедшую дату
+    if(d < today){
+      button.disabled=true;
+      button.style.opacity='.28';
+      button.style.cursor='default';
+    }else{
+      button.addEventListener('click',()=>selectDate(d));
+    }
+
+    if(chosenDate && d.getTime()===chosenDate.getTime()){
+      button.style.background='#ff4f81';
+      button.style.color='white';
+      button.style.fontWeight='700';
+    }
+
+    if(d.getTime()===today.getTime()){
+      button.style.boxShadow='inset 0 0 0 2px #ff9fba';
+    }
+
+    calendar.appendChild(button);
+  }
+}
+
+function selectDate(date){
+  chosenDate=new Date(date);
+  chosenDate.setHours(0,0,0,0);
+
+  const formatted=chosenDate.toLocaleDateString('ru-RU',{
+    day:'numeric',
+    month:'long',
+    year:'numeric'
+  });
+
+  selectedDate.textContent='Выбрано: ' + formatted + ' ❤️';
+  dateContinue.style.display='block';
+  renderCalendar();
+}
+
+dateContinue.addEventListener('click',()=>{
+  activate('quiz');
+  renderQuestion();
+});
+
+function renderQuestion(){
+  const item=questions[current];
+  document.getElementById('qNumber').textContent=`Вопрос ${current+1} из ${questions.length}`;
+  document.getElementById('question').textContent=item.q;
+  document.getElementById('progress').style.width=((current)/questions.length*100)+'%';
+  const box=document.getElementById('answers');
+  box.innerHTML='';
+  item.a.forEach((answer,i)=>{
+    const b=document.createElement('button');
+    b.className='answer';
+    b.textContent=answer;
+    b.onclick=()=>choose(i);
+    box.appendChild(b);
+  });
+}
+
+function choose(index){
+  answers.push(index);
+  current++;
+  if(current<questions.length){
+    renderQuestion();
+  }else{
+    document.getElementById('progress').style.width='100%';
+    const messages=[
+      "Теперь я официально считаю, что это свидание уже наполовину состоялось ❤️",
+      "Кажется, этот тест прошёл именно так, как я и планировал 😏",
+      "Ну всё. Теперь отступать уже поздно. Свидание состоится ❤️",
+      "Спасибо за честные ответы. А теперь самое интересное начинается в реальной жизни 😉"
+    ];
+    const finalMessage = messages[Math.floor(Math.random()*messages.length)];
+    document.getElementById('resultText').textContent=finalMessage;
+
+    sendResults(finalMessage);
+    activate('result');
+  }
+}
+
+
+function sendResults(finalMessage){
+  if(!TELEGRAM_ENDPOINT || TELEGRAM_ENDPOINT === 'PASTE_GOOGLE_APPS_SCRIPT_URL_HERE'){
+    console.warn('Telegram endpoint is not configured yet.');
+    return;
+  }
+
+  const dateText = chosenDate
+    ? chosenDate.toLocaleDateString('ru-RU', {
+        day:'numeric',
+        month:'long',
+        year:'numeric'
+      })
+    : 'Дата не выбрана';
+
+  const result = {
+    date: dateText,
+    answers: questions.map((item, i) => ({
+      question: item.q,
+      answer: item.a[answers[i]] ?? '—'
+    })),
+    finalMessage: finalMessage
+  };
+
+  // text/plain avoids a browser preflight request to Google Apps Script.
+  fetch(TELEGRAM_ENDPOINT, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8'
+    },
+    body: JSON.stringify(result)
+  }).catch(() => {
+    // The test itself still works even if the notification fails.
+  });
+}
+
+function restart(){
+  current=0;answers=[];
+  activate('start');
+}
+</script>
+</body>
+</html>
